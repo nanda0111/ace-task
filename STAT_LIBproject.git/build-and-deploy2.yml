@@ -1,0 +1,40 @@
+name: Build and Deploy BAR File
+
+on:
+  push:
+    branches:
+      - main    # Trigger on pushes to the 'main' branch
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the source code
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up IBM ACE Toolkit
+      - name: Install IBM ACE Toolkit
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ibm-ace
+
+      # Step 3: Build the BAR file
+      - name: Build BAR File
+        run: |
+          echo "Building BAR file..."
+          mqsipackagebar -w . -a STAT_LIBproject.generated.bar -k STAT_LIB
+        env:
+          MQSI_WORKPATH: "/var/mqsi"  # Update if required
+
+      # Step 4: Commit BAR File to the Repository
+      - name: Commit and Push BAR File
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "nandakishoretherdelly@gmail.com
+          git add STAT_LIBproject.generated.bar
+          git commit -m "Generated BAR file: STAT_LIBproject.generated.bar"
+          git push origin main
+
