@@ -1,0 +1,38 @@
+name: Build BAR File
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual triggering of the workflow.
+
+jobs:
+  build-bar:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the source code from the repository.
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up ACE environment.
+      - name: Set Up IBM ACE Toolkit
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ibm-ace
+
+      # Step 3: Build the BAR file.
+      - name: Build BAR File
+        run: |
+          echo "Building BAR file using mqsipackagebar..."
+          mqsipackagebar -w . -a STAT_LIBproject.generated.bar -k STAT_LIB
+        env:
+          MQSI_WORKPATH: "/var/mqsi" # Adjust this path if needed.
+
+      # Step 4: Upload the BAR file as an artifact.
+      - name: Upload BAR File
+        uses: actions/upload-artifact@v3
+        with:
+          name: STAT_LIBproject.generated.bar
+          path: ./STAT_LIBproject.generated.bar
+
